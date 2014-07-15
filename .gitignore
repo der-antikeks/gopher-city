@@ -1,0 +1,8 @@
+*.exe
+*.prof
+*.mprof
+*.cprof
+*.cover
+Thumbs.db
+Desktop.ini
+.DS_Store
