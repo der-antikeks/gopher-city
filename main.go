@@ -130,6 +130,22 @@ var ascii = map[string][]rune{
 	"thick":   []rune{'╔', '═', '╗', '║', '╚', '╝'},
 }
 
+type Zone struct {
+	Type ClickMode
+}
+
+type Building struct {
+	Type    ClickMode
+	Density int
+	Zones   []*Zone
+}
+
+type Gopher struct {
+	Home      *Building
+	Work      *Building
+	Happiness int
+}
+
 type ClickMode int
 
 const (
