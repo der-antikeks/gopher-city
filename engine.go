@@ -1,81 +1,12 @@
 package main
 
-import "fmt"
-
-func main() {
-	e := NewEngine()
-	e.SubscribeFunc(Tick, func(m Message) {
-		fmt.Println("tick:", m)
-	})
-	e.SubscribeFunc(Add, func(m Message) {
-		fmt.Println("add:", m)
-	})
-	e.SubscribeFunc(Add|Position, func(m Message) {
-		fmt.Println("add position:", m)
-	})
-	e.SubscribeFunc(Update|Position, func(m Message) {
-		fmt.Println("update position:", m)
-	})
-	e.SubscribeFunc(Update|Position|Velocity, func(m Message) {
-		fmt.Println("update position, velocity:", m)
-	})
-
-	e.Publish(Message{
-		Add | Position | Velocity | Geometry,
-		"add, position, velocity, geometry",
-	})
-
-	e.Publish(Message{
-		Update | Position,
-		"update, position",
-	})
-
-	e.Publish(Message{
-		Update | Position | Velocity | Geometry,
-		"update, position, velocity, geometry",
-	})
-
-	e.Publish(Message{
-		Tick,
-		"tick",
-	})
-}
-
-type Entity uint
-
-type Kind uint16
-
-func (k Kind) String() string {
-	return fmt.Sprintf("%016b", k)
-}
-
-func (a Kind) Contains(b Kind) bool {
-	return b&^a == 0
-}
-
-func (a Kind) Intersects(b Kind) bool {
-	return b&a > 0
-}
-
-const (
-	// process
-	Tick Kind = 1 << iota
-	Quit
-
-	// entity
-	Add
-	Update
-	Remove
-
-	// components
-	Position
-	Velocity
-	Geometry
-)
-
 type Message struct {
 	Flags   Kind
 	Payload interface{}
+}
+
+func (m Message) Kind(f Kind) bool {
+	return m.Flags.Contains(f)
 }
 
 type System interface {
@@ -96,8 +27,6 @@ func NewEngine() *Engine {
 		subscribers: make(map[Kind][]System),
 	}
 }
-
-var DefaultEngine = NewEngine()
 
 func (e *Engine) Subscribe(k Kind, s System) {
 	e.subscribers[k] = append(e.subscribers[k], s)
